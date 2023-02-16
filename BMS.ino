@@ -1,3 +1,31 @@
+//https://github.com/bitwiseAr/Curso-Arduino-desde-cero/blob/master/Capitulo22/Capitulo22-Programa1.txt
+//https://github.com/bitwiseAr/Curso-Arduino-desde-cero/tree/master/Capitulo21
+//https://github.com/bitwiseAr/Curso-Arduino-desde-cero/tree/master/Capitulo47
+//https://hetpro-store.com/TUTORIALES/arduino-timer/
+//https://github.com/n0m1/Sleep_n0m1
+
+/*comentarios para el siguiente cambio 
+
+leer la corriente 
+activar y desactivar el relay 
+
+mas menus 
+
+pitido de buzzer cuando sea necesario 
+
+
+sleep mode
+
+
+*/
+
+
+
+
+
+
+
+
 #include <Wire.h>      // libreria para bus I2C
 #include <Adafruit_GFX.h>    // libreria para pantallas graficas
 #include <Adafruit_SSD1306.h>   // libreria para controlador SSD1306
@@ -7,7 +35,7 @@
 Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);  // crea objeto
 float Baterry[6];
 bool Estado=0;
-const int PinesAnalogicos[6] ={A0,A1,A2,A3,A6};
+const int PinesAnalogicos[6] ={A0,A1,A2,A3,A6};//valores de baterias 
 const int corriente=A7;
 
 
@@ -15,7 +43,7 @@ const int corriente=A7;
 
 int ANTERIOR = 0;    // almacena valor anterior de la variable POSICION
 volatile int POSICION = 0; // variable POSICION con valor inicial de 50 y definida
-int selector=4;
+int selector=4;//
 
 void setup() {
   Definir_Pines();//define pines y pantalla
@@ -23,7 +51,7 @@ void setup() {
   Pantalla();//inicializa pantalla y muestra un mensaje en paantalla 
   delay(1000);
   digitalWrite(4, LOW);//led del arduino
-
+  selector=4;
 
 }
 void loop() {
@@ -40,6 +68,7 @@ switch (selector) {
     break;
   default:
     MENU();
+    Luz_Led(0,0,0);
     break;
 
 
@@ -47,7 +76,7 @@ switch (selector) {
 }
   
   Serial.println("  ");
-  delay(1000);
+  delay(100);
 
 
   
@@ -97,7 +126,7 @@ switch (selector) {
           pinMode(4, OUTPUT);//Buzzer 
           pinMode(3, INPUT_PULLUP);//Swich Encoder        
           pinMode(2, INPUT);    // A como entrada
-          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, CHANGE);//Preciona el boton
+          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, FALLING);//Preciona el boton
           attachInterrupt(digitalPinToInterrupt(2), encoder, LOW);// interrupcion sobre pin A con
           digitalWrite(5, LOW);//led del arduino
           digitalWrite(4, LOW);//led del arduino
@@ -132,6 +161,7 @@ switch (selector) {
                 //estado bueno de bateria
                 Serial.println("Buen estado de bateria ");
                 Estado=false;
+                Luz_Led(0,1,0);
                 
               }
               else{
@@ -139,10 +169,19 @@ switch (selector) {
                 //Desactiva salida 
                 Serial.println("Mal estado de bateria ");
                 Estado=true;//uno si es critico
+                Luz_Led(1,0,0);
                 break;
               }
         
         }
+      }
+      void Luz_Led(bool R, bool G,bool B){
+
+      digitalWrite(8, R); 
+      digitalWrite(7, G); 
+      digitalWrite(6, B); 
+
+        
       }
       void Analisis_voltaje_total(){
       float Voltaje_total=0.00;
@@ -231,13 +270,17 @@ switch (selector) {
 
       
       void Boton_Encoder(){
-         /*   if(selector!=4){
-              selector=4;
 
-            }
+          if(selector==4){
+             selector=POSICION;
+         
+          }
           else{
-            */
-            selector=POSICION;
+            selector=4;
+          }
+             
+
+        
           digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 
 
