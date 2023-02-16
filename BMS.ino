@@ -9,46 +9,133 @@ float Baterry[6];
 bool Estado=0;
 const int PinesAnalogicos[6] ={A0,A1,A2,A3,A6};
 const int corriente=A7;
+
+
+
+
+int ANTERIOR = 0;    // almacena valor anterior de la variable POSICION
+volatile int POSICION = 0; // variable POSICION con valor inicial de 50 y definida
+int selector=4;
+
 void setup() {
-  Definir_Pines();
-  Serial.begin(19200);Serial.println("Baterias");
-  Pantalla();
+  Definir_Pines();//define pines y pantalla
+  Serial.begin(19200);Serial.println("Baterias");// inicia la comunicacion serie e imprime "Bateria"
+  Pantalla();//inicializa pantalla y muestra un mensaje en paantalla 
   delay(1000);
+  digitalWrite(4, LOW);//led del arduino
+
+
 }
 void loop() {
-  Lectura_Baterias();//Lee todos los puertos analogicos para las bates 
-  Analisis_de_Bateria();
-  Serial.println("  ");
-  delay(500);
+Lectura_Baterias();
+switch (selector) {
+  case 0:
+   Analisis_de_Bateria();
+    break;
+  case 1:
+    // statements
+    break;
+  case 2:
+    // statements
+    break;
+  default:
+    MENU();
+    break;
 
 
   
 }
+  
+  Serial.println("  ");
+  delay(1000);
+
+
+  
+}
+
+
+      void MENU(){
+        oled.clearDisplay();      // limpia pantalla
+        oled.setCursor(0, 0);     // ubica cursor en inicio de coordenadas 0,0
+        oled.setTextSize(1);      // establece tamano de texto en 1
+        oled.print("MENU");  // escribe en pantalla el texto}
+        oled.setCursor(0, 16);   
+        oled.setTextSize(2);
+        oled.print("Estado    "); 
+        oled.print("Graficos  "); 
+        oled.print("Esclavo   "); 
+
+         oled.drawCircle(110, 16+6+POSICION*17, 6, WHITE); 
+
+        
+
+
+
+
+
+
+        
+        oled.display();
+
+        
+      }
+      void Estado_Del_Sistema(){
+       
+        Analisis_de_Bateria();//limpia los datos
+      }
+      void Definir_Pines(){
+          pinMode(LED_BUILTIN, OUTPUT);//led del arduino
+
+
+          
+          
+          pinMode(9,  INPUT);// B como entrada 
+          pinMode(8, OUTPUT);//Luz Red
+          pinMode(7, OUTPUT);//Luz Green
+          pinMode(6, OUTPUT);//Luz Blue
+          pinMode(5, OUTPUT);//Relay
+          pinMode(4, OUTPUT);//Buzzer 
+          pinMode(3, INPUT_PULLUP);//Swich Encoder        
+          pinMode(2, INPUT);    // A como entrada
+          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, CHANGE);//Preciona el boton
+          attachInterrupt(digitalPinToInterrupt(2), encoder, LOW);// interrupcion sobre pin A con
+          digitalWrite(5, LOW);//led del arduino
+          digitalWrite(4, LOW);//led del arduino
+          Wire.begin();          // inicializa bus I2C
+          oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); // inicializa pantalla con direccion 0x3C   
+      }
+      
       void Lectura_Baterias(){
         for(int i=0;i<6;i++){ 
-              Baterry[i]= (analogRead(PinesAnalogicos[i]) * (5.00/ 1023.00));   
+              Baterry[i]= (analogRead(PinesAnalogicos[i]) * (5.00/ 1023.00));//convierte bites en voltaje para analisar y lo guarda en baterry
         }
       }
+      
+      void Analisis_de_Bateria(){//analiza el voltaje 
+        Analisis_Voltajes();//Comprueba el estado critico o bueno de la bateria
+        Analisis_voltaje_total();//Suma de todos los voltajes para voltaje total
+        Despliega_Voltajes();//Despliega valores en la pantalla oled
+      }
+
+
+      
       void Imprime_Voltaje(){
         for(int i=0;i<5;i++){ 
           Serial.print("Bateria: ");Serial.print(i+1);Serial.print("  ");Serial.print(Baterry[i]);Serial.println(" V");
         }
         Serial.print("Voltaje total:");Serial.print(Baterry[5]);Serial.println(" V");
       }
-      void Definir_Pines(){
-          pinMode(LED_BUILTIN, OUTPUT);//led del arduino
-          Wire.begin();          // inicializa bus I2C
-          oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); // inicializa pantalla con direccion 0x3C   
-      }
+     
       void Analisis_Voltajes(){
-        for(int i=0;i<5;i++){ 
+        for(int i=0;i<5;i++){ //revisa los voltajes uno por uno 
               if (Baterry[i]> 2.8   &&  Baterry[i] <  4.25){
+                //estado bueno de bateria
                 Serial.println("Buen estado de bateria ");
                 Estado=false;
                 
               }
               else{
-                //estado critico 
+                //estado critico de bateria
                 //Desactiva salida 
                 Serial.println("Mal estado de bateria ");
                 Estado=true;//uno si es critico
@@ -60,15 +147,11 @@ void loop() {
       void Analisis_voltaje_total(){
       float Voltaje_total=0.00;
         for(int i=0;i<5;i++){ 
-          Voltaje_total+=Baterry[i];
+          Voltaje_total+=Baterry[i];//sumatoria de todos los voltajes 
         }
-        Baterry[5]=Voltaje_total;
+        Baterry[5]=Voltaje_total;//lo guarda al final del arreglo 
       }
-      void Analisis_de_Bateria(){//analiza el voltaje 
-        Analisis_Voltajes();
-        Analisis_voltaje_total();
-        Despliega_Voltajes();
-      }
+
       void Despliega_Voltajes(){
         oled.clearDisplay();      // limpia pantalla
         oled.setCursor(0, 0);     // ubica cursor en inicio de coordenadas 0,0
@@ -77,7 +160,7 @@ void loop() {
         for(int i=0;i<5;i++){ 
           oled.setCursor (7, 16+(i*10));    // ubica cursor en coordenas 10,30
           oled.print("B");    // escribe valor de millis() dividido por 1000
-          oled.print(i);    // escribe valor de millis() dividido por 1000
+          oled.print(i+1);    // escribe valor de millis() dividido por 1000
           oled.print(": ");    // escribe valor de millis() dividido por 1000
           oled.print(Baterry[i]);    // escribe valor de millis() dividido por 1000
           oled.print("V");    // escribe valor de millis() dividido por 1000
@@ -121,3 +204,46 @@ void loop() {
           delay(100);   
         }
       }
+
+
+
+      void encoder()  {
+        static unsigned long ultimaInterrupcion = 0;  // variable static con ultimo valor de
+                  // tiempo de interrupcion
+        unsigned long tiempoInterrupcion = millis();  // variable almacena valor de func. millis
+      
+        if (tiempoInterrupcion - ultimaInterrupcion > 5) {  // rutina antirebote desestima
+                    // pulsos menores a 5 mseg.
+          if (digitalRead(9) == LOW)     // si B es HIGH, sentido horario
+          {
+            POSICION++ ;        // incrementa POSICION en 1
+          }
+          else {          // si B es LOW, senti anti horario
+            POSICION-- ;        // decrementa POSICION en 1
+          }
+      
+          POSICION = min(2, max(0, POSICION));  // establece limite inferior de 0 y
+                  // superior de 100 para POSICION
+          ultimaInterrupcion = tiempoInterrupcion;  // guarda valor actualizado del tiempo
+        }           // de la interrupcion en variable static
+      }
+
+
+      
+      void Boton_Encoder(){
+         /*   if(selector!=4){
+              selector=4;
+
+            }
+          else{
+            */
+            selector=POSICION;
+          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+
+
+          
+        
+      }
+
+
+      
