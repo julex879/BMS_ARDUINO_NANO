@@ -23,7 +23,7 @@ void setup() {
   Pantalla();//inicializa pantalla y muestra un mensaje en paantalla 
   delay(1000);
   digitalWrite(4, LOW);//led del arduino
-
+  selector=4;
 
 }
 void loop() {
@@ -40,6 +40,7 @@ switch (selector) {
     break;
   default:
     MENU();
+    Luz_Led(0,0,0);
     break;
 
 
@@ -47,7 +48,7 @@ switch (selector) {
 }
   
   Serial.println("  ");
-  delay(1000);
+  delay(100);
 
 
   
@@ -97,7 +98,7 @@ switch (selector) {
           pinMode(4, OUTPUT);//Buzzer 
           pinMode(3, INPUT_PULLUP);//Swich Encoder        
           pinMode(2, INPUT);    // A como entrada
-          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, CHANGE);//Preciona el boton
+          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, FALLING);//Preciona el boton
           attachInterrupt(digitalPinToInterrupt(2), encoder, LOW);// interrupcion sobre pin A con
           digitalWrite(5, LOW);//led del arduino
           digitalWrite(4, LOW);//led del arduino
@@ -132,6 +133,7 @@ switch (selector) {
                 //estado bueno de bateria
                 Serial.println("Buen estado de bateria ");
                 Estado=false;
+                Luz_Led(0,1,0);
                 
               }
               else{
@@ -139,10 +141,19 @@ switch (selector) {
                 //Desactiva salida 
                 Serial.println("Mal estado de bateria ");
                 Estado=true;//uno si es critico
+                Luz_Led(1,0,0);
                 break;
               }
         
         }
+      }
+      void Luz_Led(bool R, bool G,bool B){
+
+      digitalWrite(8, R); 
+      digitalWrite(7, G); 
+      digitalWrite(6, B); 
+
+        
       }
       void Analisis_voltaje_total(){
       float Voltaje_total=0.00;
@@ -231,13 +242,17 @@ switch (selector) {
 
       
       void Boton_Encoder(){
-         /*   if(selector!=4){
-              selector=4;
 
-            }
+          if(selector==4){
+             selector=POSICION;
+         
+          }
           else{
-            */
-            selector=POSICION;
+            selector=4;
+          }
+             
+
+        
           digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 
 
