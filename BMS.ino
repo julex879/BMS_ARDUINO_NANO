@@ -3,7 +3,8 @@
 //https://github.com/bitwiseAr/Curso-Arduino-desde-cero/tree/master/Capitulo47
 //https://hetpro-store.com/TUTORIALES/arduino-timer/
 //https://github.com/n0m1/Sleep_n0m1
-
+//https://github.com/electgpl/Firmware-Electronica/blob/master/ARDUINO/ARDUINO%20Media%20Movil%20como%20Filtro%20Pasa%20Bajos.ino
+//https://www.youtube.com/watch?v=Pl79Ni3NUsY
 /*comentarios para el siguiente cambio 
 
 leer la corriente 
@@ -20,7 +21,9 @@ sleep mode
 */
 
 
-
+int adc_filtrado = 0;
+int adc_raw = 0;
+#define alpha 0.05
 
 
 
@@ -48,7 +51,7 @@ int selector=4;//
 float Sensibilidad=0.066;
 
 
-
+bool estado=true;
 
 
 
@@ -56,13 +59,14 @@ void setup() {
   Definir_Pines();//define pines y pantalla
   Serial.begin(19200);Serial.println("Baterias");// inicia la comunicacion serie e imprime "Bateria"
   Pantalla();//inicializa pantalla y muestra un mensaje en paantalla 
-  delay(1000);
+  delay(500);
   digitalWrite(4, LOW);//led del arduino
   selector=4;
 
 }
 void loop() {
 Lectura_Baterias();
+delay(1000);
 switch (selector) {
   case 0:
 
@@ -70,12 +74,16 @@ switch (selector) {
     break;
   case 1:
     // statements
+
+    digitalWrite(5, estado );//Relay
+    Estado_Relay();
     break;
   case 2:
     // statements
     break;
   default:
     MENU();
+    digitalWrite(4, LOW);//led del arduino
     Luz_Led(0,0,0);
     break;
 
@@ -84,7 +92,7 @@ switch (selector) {
 }
   
 
-  delay(100);
+  
 
 
   
@@ -99,9 +107,10 @@ switch (selector) {
         oled.setCursor(0, 16);   
         oled.setTextSize(2);
         oled.print("Estado    "); 
-        oled.print("Graficos  "); 
+        oled.print("Relay     "); 
         oled.print("Esclavo   "); 
-
+        //estado sueño
+        //
          oled.drawCircle(110, 16+6+POSICION*17, 6, WHITE); 
 
         
@@ -120,6 +129,20 @@ switch (selector) {
        
         Analisis_de_Bateria();//limpia los datos v=RI
       }
+      void Estado_Relay(){
+
+        oled.clearDisplay();      // limpia pantalla
+        oled.setCursor(0, 16);     // ubica cursor en inicio de coordenadas 0,0
+        oled.setTextSize(3);      // establece tamano de texto en 1
+        oled.print("Relay:");  // escribe en pantalla el texto
+        oled.print(estado);  // escribe en pantalla el texto
+         oled.display(); 
+      }
+
+
+
+
+      
       void Definir_Pines(){
           pinMode(LED_BUILTIN, OUTPUT);//led del arduino
 
@@ -134,7 +157,7 @@ switch (selector) {
           pinMode(4, OUTPUT);//Buzzer 
           pinMode(3, INPUT_PULLUP);//Swich Encoder        
           pinMode(2, INPUT);    // A como entrada
-          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, FALLING);//Preciona el boton
+          attachInterrupt(digitalPinToInterrupt(3), Boton_Encoder, RISING);//Preciona el boton
           attachInterrupt(digitalPinToInterrupt(2), encoder, LOW);// interrupcion sobre pin A con
           digitalWrite(5, HIGH );//Relay
           digitalWrite(4, LOW);//Buzzer
@@ -145,7 +168,18 @@ switch (selector) {
       void Lectura_Baterias(){
         for(int i=0;i<6;i++){ 
               Baterry[i]= (analogRead(PinesAnalogicos[i]) * (5.00/ 1023.00))+0.09;//convierte bites en voltaje para analisar y lo guarda en baterry/////////////////////////////////////////////////////////////////////
+        
+        
+        /*
+         adc_raw = analogRead(A0);
+         adc_filtrado = (alpha*adc_raw) + ((1-alpha)*adc_filtrado);
+         */
+        
+        
         }
+
+
+        
           I=obten_corriente(200); 
         
       }
@@ -303,7 +337,7 @@ switch (selector) {
 
       
       void Boton_Encoder(){
-          delay(1000);
+         
           if(selector==4){
              selector=POSICION;
          
@@ -311,7 +345,13 @@ switch (selector) {
           else{
             selector=4;
           }
-             
+
+
+
+
+          if(selector==1){
+              estado=!estado;
+          }
 
         
           digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
