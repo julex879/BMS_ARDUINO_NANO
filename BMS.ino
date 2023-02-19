@@ -242,7 +242,7 @@ switch (selector) {
           oled.print(": ");    // escribe valor de millis() dividido por 1000
           oled.print(Baterry[i]);    // escribe valor de millis() dividido por 1000
           oled.print("V");    // escribe valor de millis() dividido por 1000
-        }
+        } 
         
         oled.setCursor (65, 16);    // ubica cursor en coordenas 10,30
         oled.print("BT: ");    // escribe valor de millis() dividido por 1000
