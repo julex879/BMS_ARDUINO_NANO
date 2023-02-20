@@ -21,9 +21,7 @@ sleep mode
 */
 
 
-int adc_filtrado = 0;
-int adc_raw = 0;
-#define alpha 0.05
+float alpha =5.10;
 
 
 
@@ -39,7 +37,7 @@ Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);  // crea objeto
 float Baterry[6];
 bool Estado=0;
 const int PinesAnalogicos[6] ={A0,A1,A2,A3,A6};//valores de baterias 
-const int corriente=A7;
+
 
 float I=0.00;
 
@@ -49,9 +47,22 @@ volatile int POSICION = 0; // variable POSICION con valor inicial de 50 y defini
 int selector=4;//
 
 float Sensibilidad=0.066;
-
-
 bool estado=true;
+
+
+int ventana=3;
+/////////////////////////////////////////////////////"Esclavo   "
+String MENUS[4]={"Estado    ","Relay     ","Esclavo   ","Sleep mod "};
+/*
+         oled.print("Estado    "); 
+        oled.print("Relay     "); 
+        oled.print("Esclavo   "); 
+ */
+
+
+
+
+
 
 
 
@@ -73,13 +84,23 @@ switch (selector) {
    Analisis_de_Bateria();
     break;
   case 1:
-    // statements
+    // RELAY
 
     digitalWrite(5, estado );//Relay
     Estado_Relay();
     break;
   case 2:
-    // statements
+    // Esclavo
+    break;
+      case 3:
+    // Sleep mod
+
+
+oled.clearDisplay();
+     oled.display(); 
+    while(1){
+      
+    }
     break;
   default:
     MENU();
@@ -106,12 +127,33 @@ switch (selector) {
         oled.print("MENU");  // escribe en pantalla el texto}
         oled.setCursor(0, 16);   
         oled.setTextSize(2);
-        oled.print("Estado    "); 
-        oled.print("Relay     "); 
-        oled.print("Esclavo   "); 
+
+
+
+
+
+        if(POSICION<3){
+          for(int i=0;i<3;i++){
+            oled.print(MENUS[i]); 
+           }
+            oled.drawCircle(121, 16+6+POSICION*17, 6, WHITE); 
+        }
+        else{
+         
+
+        for(int i=1;i<4;i++){
+            oled.print(MENUS[i]); 
+           }
+           oled.drawCircle(121, 16+6+2*17, 6, WHITE); 
+        }
+
+
+
+
+        
         //estado sueño
         //
-         oled.drawCircle(110, 16+6+POSICION*17, 6, WHITE); 
+         //oled.drawCircle(110, 16+6+POSICION*17, 6, WHITE); 
 
         
 
@@ -174,7 +216,13 @@ switch (selector) {
          adc_raw = analogRead(A0);
          adc_filtrado = (alpha*adc_raw) + ((1-alpha)*adc_filtrado);
          */
-        
+
+                 /*
+
+         Baterry[i] = (alpha*analogRead(A0)) + ((1-alpha)*Baterry[i]);
+         */
+       
+         Baterry[i] = (alpha*Baterry[i]) + ((1-alpha)*Baterry[i]);
         
         }
 
@@ -196,7 +244,7 @@ switch (selector) {
      
       void Analisis_Voltajes(){
         for(int i=0;i<5;i++){ //revisa los voltajes uno por uno 
-              if (Baterry[i]> 2.8   &&  Baterry[i] <  4.25){
+              if (Baterry[i]> 2.8   &&  Baterry[i] <  4.3){
                 //estado bueno de bateria
                 digitalWrite(4, LOW);//Buzzer
                 Estado=false;
@@ -206,7 +254,8 @@ switch (selector) {
               else{
                 //estado critico de bateria
                 //Desactiva salida 
-                digitalWrite(4, HIGH);//Buzzer
+                //digitalWrite(4, HIGH);//Buzzer
+                digitalWrite(5, LOW);//Relay
                 Estado=true;//uno si es critico
                 Luz_Led(1,0,0);
                 break;
@@ -264,7 +313,7 @@ switch (selector) {
           oled.drawTriangle(80,57 ,110, 57    ,95 ,35 ,   WHITE);
           oled.drawLine(95 ,40,95 ,40+8, WHITE);
           oled.drawCircle(95, 48+3, 1, WHITE);  
-          Funcion_Blink(4);//alerta 
+        
         }
          oled.display();     // muestra en pantalla todo lo establecido anteriormente
       }
@@ -328,7 +377,7 @@ switch (selector) {
             POSICION-- ;        // decrementa POSICION en 1
           }
       
-          POSICION = min(2, max(0, POSICION));  // establece limite inferior de 0 y
+          POSICION = min(3, max(0, POSICION));  // establece limite inferior de 0 y    //0,1,2,3
                   // superior de 100 para POSICION
           ultimaInterrupcion = tiempoInterrupcion;  // guarda valor actualizado del tiempo
         }           // de la interrupcion en variable static
@@ -354,7 +403,7 @@ switch (selector) {
           }
 
         
-          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+          //digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 
 
           
