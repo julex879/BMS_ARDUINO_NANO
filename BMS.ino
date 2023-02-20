@@ -5,6 +5,7 @@
 //https://github.com/n0m1/Sleep_n0m1
 //https://github.com/electgpl/Firmware-Electronica/blob/master/ARDUINO/ARDUINO%20Media%20Movil%20como%20Filtro%20Pasa%20Bajos.ino
 //https://www.youtube.com/watch?v=Pl79Ni3NUsY
+//https://thekurks.net/blog/2018/1/24/guide-to-arduino-sleep-mode
 /*comentarios para el siguiente cambio 
 
 leer la corriente 
@@ -24,7 +25,7 @@ sleep mode
 float alpha =5.10;
 
 
-
+#include <avr/sleep.h>//this AVR library contains the methods that controls the sleep modes
 
 
 #include <Wire.h>      // libreria para bus I2C
@@ -98,9 +99,7 @@ switch (selector) {
 
 oled.clearDisplay();
      oled.display(); 
-    while(1){
-      
-    }
+    Going_To_Sleep();
     break;
   default:
     MENU();
@@ -361,6 +360,15 @@ oled.clearDisplay();
       return(corriente);
       }
 
+
+void Going_To_Sleep(){
+    sleep_enable();//Enabling sleep mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);//Setting the sleep mode, in our case full sleep
+    sleep_cpu();//activating sleep mode}
+}
+
+
+
 /////////////////////////////////////////interrupciones////////////////////////////////
       void encoder()  {
         static unsigned long ultimaInterrupcion = 0;  // variable static con ultimo valor de
@@ -386,7 +394,7 @@ oled.clearDisplay();
 
       
       void Boton_Encoder(){
-         
+         sleep_disable();//Disable sleep mode
           if(selector==4){
              selector=POSICION;
          
@@ -409,6 +417,13 @@ oled.clearDisplay();
           
         
       }
+
+
+
+
+
+
+      
 
 
       
