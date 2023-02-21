@@ -20,7 +20,7 @@ sleep mode
 
 
 */
-
+#include <OneWire.h>
 
 float alpha =5.10;
 
@@ -97,8 +97,8 @@ switch (selector) {
     // Sleep mod
 
 
-//oled.clearDisplay();
- //    oled.display(); 
+oled.clearDisplay();
+     oled.display(); 
     Going_To_Sleep();
     break;
   default:
@@ -327,7 +327,15 @@ switch (selector) {
         oled.print("BMS JX");      // escribe texto
         oled.display();     // muestra en pantalla todo lo establecido anteriormente
       }
-
+  
+      void Funcion_Blink(int pitido){
+        for(int i =0;i<pitido;i++){
+          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+          delay(100);                       // wait for a second
+          digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+          delay(100);   
+        }
+      }
 
 
 
@@ -354,8 +362,7 @@ switch (selector) {
 
 
 void Going_To_Sleep(){
-    CLKPR=0X80;
-    CLKPR=0X04;
+    
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);//Setting the sleep mode, in our case full sleep
     sleep_enable();//Enabling sleep mode
     sleep_cpu();//activating sleep mode}
@@ -388,7 +395,7 @@ void Going_To_Sleep(){
 
       
       void Boton_Encoder(){
-        
+         sleep_disable();//Disable sleep mode
           if(selector==4){
              selector=POSICION;
          
@@ -397,13 +404,6 @@ void Going_To_Sleep(){
             selector=4;
           }
 
-
-
-          if(selector==3){
-            CLKPR=0X80;
-            CLKPR=0X00;
-           sleep_disable();//Disable sleep mode
-          }
 
 
 
