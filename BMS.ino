@@ -26,7 +26,7 @@ float alpha =5.10;
 
 
 #include <avr/sleep.h>//this AVR library contains the methods that controls the sleep modes
-
+//https://www.youtube.com/watch?v=usKaGRzwIMI
 
 #include <Wire.h>      // libreria para bus I2C
 #include <Adafruit_GFX.h>    // libreria para pantallas graficas
@@ -97,8 +97,8 @@ switch (selector) {
     // Sleep mod
 
 
-oled.clearDisplay();
-     oled.display(); 
+//oled.clearDisplay();
+ //    oled.display(); 
     Going_To_Sleep();
     break;
   default:
@@ -327,15 +327,7 @@ oled.clearDisplay();
         oled.print("BMS JX");      // escribe texto
         oled.display();     // muestra en pantalla todo lo establecido anteriormente
       }
-  
-      void Funcion_Blink(int pitido){
-        for(int i =0;i<pitido;i++){
-          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-          delay(100);                       // wait for a second
-          digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-          delay(100);   
-        }
-      }
+
 
 
 
@@ -362,8 +354,10 @@ oled.clearDisplay();
 
 
 void Going_To_Sleep(){
-    sleep_enable();//Enabling sleep mode
+    CLKPR=0X80;
+    CLKPR=0X04;
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);//Setting the sleep mode, in our case full sleep
+    sleep_enable();//Enabling sleep mode
     sleep_cpu();//activating sleep mode}
 }
 
@@ -394,7 +388,7 @@ void Going_To_Sleep(){
 
       
       void Boton_Encoder(){
-         sleep_disable();//Disable sleep mode
+        
           if(selector==4){
              selector=POSICION;
          
@@ -403,6 +397,13 @@ void Going_To_Sleep(){
             selector=4;
           }
 
+
+
+          if(selector==3){
+            CLKPR=0X80;
+            CLKPR=0X00;
+           sleep_disable();//Disable sleep mode
+          }
 
 
 
