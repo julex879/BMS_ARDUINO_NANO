@@ -6,6 +6,10 @@
 //https://github.com/electgpl/Firmware-Electronica/blob/master/ARDUINO/ARDUINO%20Media%20Movil%20como%20Filtro%20Pasa%20Bajos.ino
 //https://www.youtube.com/watch?v=Pl79Ni3NUsY
 //https://thekurks.net/blog/2018/1/24/guide-to-arduino-sleep-mode
+
+//DS18B20 Sensor de Temperatura Digital de Acero Inoxidable Sumergible
+//https://github.com/PaulStoffregen/OneWire
+//https://github.com/milesburton/Arduino-Temperature-Control-Library
 /*comentarios para el siguiente cambio 
 
 leer la corriente 
@@ -21,6 +25,7 @@ sleep mode
 
 */
 #include <OneWire.h>
+#include <DallasTemperature.h>
 
 float alpha =5.10;
 
@@ -38,7 +43,7 @@ Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);  // crea objeto
 float Baterry[6];
 bool Estado=0;
 const int PinesAnalogicos[6] ={A0,A1,A2,A3,A6};//valores de baterias 
-
+const int oneWirePin = 10;
 
 float I=0.00;
 
@@ -64,20 +69,24 @@ String MENUS[4]={"Estado    ","Relay     ","Esclavo   ","Sleep mod "};
 
 
 
-
+//OneWire oneWireBus(oneWirePin);
+//DallasTemperature sensor(&oneWireBus);
 
 
 void setup() {
   Definir_Pines();//define pines y pantalla
   Serial.begin(19200);Serial.println("Baterias");// inicia la comunicacion serie e imprime "Bateria"
+  //leer_temperatura();
+  Serial.println("Entro en main");
   Pantalla();//inicializa pantalla y muestra un mensaje en paantalla 
   delay(500);
   digitalWrite(4, LOW);//led del arduino
   selector=4;
-
+  
 }
 void loop() {
 Lectura_Baterias();
+
 delay(1000);
 switch (selector) {
   case 0:
@@ -204,6 +213,7 @@ oled.clearDisplay();
           digitalWrite(4, LOW);//Buzzer
           Wire.begin();          // inicializa bus I2C
           oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); // inicializa pantalla con direccion 0x3C   
+          //sensor.begin(); 
       }
       
       void Lectura_Baterias(){
@@ -367,7 +377,17 @@ void Going_To_Sleep(){
     sleep_enable();//Enabling sleep mode
     sleep_cpu();//activating sleep mode}
 }
+/*void leer_temperatura(){
+   Serial.println("Leyendo temperaturas: ");
+   sensor.requestTemperatures();
+   Serial.print("Temperatura en sensor 0: ");
+   Serial.print(sensor.getTempCByIndex(0));
+   Serial.println(" ºC");
 
+
+
+  
+}*/
 
 
 /////////////////////////////////////////interrupciones////////////////////////////////
